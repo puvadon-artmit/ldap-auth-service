@@ -19,54 +19,34 @@ func NewEmployeeRepositoryDB(db *gorm.DB) ports.EmployeeRepository {
 
 func (r *EmployeeRepositoryDB) GetEmployeeByFullNameEn(fullNameEn string) (*domains.EmployeeView, error) {
 	var emp domains.EmployeeView
-	query := `
-        SELECT *
-        FROM employee_view
-        WHERE UHR_FullNameEn = ?
-        LIMIT 1;
-    `
-	if err := r.db.Raw(query, fullNameEn).Scan(&emp).Error; err != nil {
+	if err := r.db.
+		Where("UHR_FullNameEn = ?", fullNameEn).
+		First(&emp).Error; err != nil {
 		return nil, err
 	}
-
 	return &emp, nil
 }
 
 func (r *EmployeeRepositoryDB) GetEmployeeByEmpCode(empCode string) (*domains.EmployeeView, error) {
+	fmt.Println("empCode : ", empCode)
 	var emp domains.EmployeeView
-	query := `
-        SELECT *
-        FROM employee_view
-        WHERE UHR_EmpCode = ?
-        LIMIT 1;
-    `
-	if err := r.db.Debug().Raw(query, empCode).Scan(&emp).Error; err != nil {
+	if err := r.db.Debug().
+		Where("UHR_EmpCode = ?", empCode).
+		First(&emp).Error; err != nil {
 		return nil, err
 	}
-
 	return &emp, nil
 }
 
 func (r *EmployeeRepositoryDB) FindEmployeeByAccount(account string) (*domains.EmployeeView, error) {
-	fmt.Println("account:", account)
+	fmt.Println("account : ", account)
 	var user domains.EmployeeView
 
-	query := `
-        SELECT *
-        FROM employee_view
-        WHERE AD_UserLogon = ?
-        LIMIT 1;
-    `
-
-	tx := r.db.Raw(query, account).Scan(&user)
-
-	if tx.Error != nil {
-		return nil, tx.Error
+	if err := r.db.Where("AD_UserLogon = ?", account).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
 	}
-
-	if tx.RowsAffected == 0 {
-		return nil, nil
-	}
-
 	return &user, nil
 }
