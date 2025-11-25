@@ -15,6 +15,7 @@ var NewCorsMiddleware = cors.New(cors.Config{
 		"http://localhost:5173",
 		"http://localhost:13002",
 		"http://localhost:5174",
+		"http://10.144.13.59",
 
 		// IP/port ภายใน
 		"http://10.0.98.208",
