@@ -20,7 +20,7 @@ services:
       - LDAP_IP=10.144.1.6
       - LDAP_DNS=psth.com
     healthcheck:    
-      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8081 || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:8081/health || exit 1"]
       interval: 30s
       timeout: 3s
       retries: 3
