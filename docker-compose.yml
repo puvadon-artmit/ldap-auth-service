@@ -1,0 +1,43 @@
+version: '3.9'
+services:
+  api-ldap-auth-service:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        MAIN_PKG: .           
+    image: ldap-auth-service:latest
+    env_file:
+      - .env    
+    restart: always   
+    environment:
+      - SQL_USER=edi-psth
+      - SQL_PASSWORD=p$$th@2025**
+      - SQL_DB=DB_EDI
+      - SQL_HOST=PSTH-SRRYAPP04
+      - SQL_PORT=1433
+      - SERVER_PORT=8081
+      - LDAP_IP=10.144.1.6
+      - LDAP_DNS=psth.com
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8081/healthz || exit 1"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    networks : 
+      - ldap-auth-service-network
+  nginx-ldap-auth-service:
+    image: nginx:latest
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d
+    depends_on:
+      - api-ldap-auth-service
+    ports:
+      - "8081:8081"
+    restart: always
+    networks:
+      - ldap-auth-service-network
+
+networks:
+  ldap-auth-service-network:
+    driver: bridge
